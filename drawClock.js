@@ -19,14 +19,14 @@ function drawClock() {
     
     setInterval(
         function(){
-            if(hourHand == 12){
-                hourHand = 0;   
+            if(hourHand > 12){
+                hourHand = 1;   
             }
-            if(minuteHand == 60){
+            if(minuteHand > 59){
                 hourHand++;
                 minuteHand = 0;
             }
-            if(secondHand == 60){
+            if(secondHand > 59){
                 minuteHand++;
                 secondHand = 0
             }
@@ -49,7 +49,7 @@ function updateSecondHand(s_canvas, secondHandIncrement, r){
     s_context.strokeStyle = "red";
     s_context.stroke();
     s_context.closePath();
-    var displaySecond = secondHandIncrement;
+    var displaySecond = secondHandIncrement % 60;
     if(displaySecond < 10){
         displaySecond = "0" + displaySecond;
     }
@@ -66,7 +66,7 @@ function updateMinuteHand(m_canvas, minuteHandIncrement, r){
     m_context.strokeStyle = "black";
     m_context.stroke();
     m_context.closePath();
-    var displayMinute = minuteHandIncrement;
+    var displayMinute = minuteHandIncrement % 60;
     if(displayMinute < 10){
         displayMinute = "0" + displayMinute;
     }
@@ -74,8 +74,8 @@ function updateMinuteHand(m_canvas, minuteHandIncrement, r){
 }
 function updateHourHand(h_canvas, hourHandIncrement, r){
     var h_context = h_canvas.getContext("2d");
-    xprime = midx - r * Math.sin(hourHandIncrement * Math.PI/15);
-    yprime = (midy - 100) + r * (1 + Math.cos(hourHandIncrement * Math.PI/15));
+    xprime = midx + r * Math.sin(hourHandIncrement * Math.PI/6);
+    yprime = (midy - 100) + r * (1 - Math.cos(hourHandIncrement * Math.PI/6));
     h_context.beginPath();
     h_context.moveTo(midx, midy);
     h_context.lineTo(xprime, yprime);
