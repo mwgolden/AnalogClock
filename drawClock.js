@@ -7,93 +7,77 @@ function drawClock() {
     midx = a_canvas.width/2;
     midy = a_canvas.height/2;
     
-    var now = new Date();
-    var secondHand = now.getSeconds();
-    var minuteHand = now.getMinutes();
-    var hourHand = now.getHours() % 12;
+    var time = new Date();
     
-    updateSecondHand(a_canvas, secondHand, r);
-    updateMinuteHand(a_canvas, minuteHand, r);
-    updateHourHand(a_canvas, hourHand, r);
-    drawCircle(a_context, r);
+    var secondHand = {
+        name: "second",
+        value: function(){return time.getSeconds();},
+        max: 60,
+        color: 'red',
+        width: 1
+    };
+    var minuteHand = {    
+        name: "minute",
+        value: function(){return time.getMinutes();},
+        max: 60,
+        color: 'blue',
+        width: 1
+    };
+    var hourHand = {
+        name: "hour",
+        value: function(){return time.getHours() % 12;},
+        max: 12,
+        color: 'black',
+        width: 3
+    };
+    hands = [hourHand, minuteHand, secondHand];
+    updateClock(a_canvas, a_context, r, hands);
     
     setInterval(
-        function(){
-            if(hourHand > 12){
-                hourHand = 1;   
-            }
-            if(minuteHand > 59){
-                hourHand++;
-                minuteHand = 0;
-            }
-            if(secondHand > 59){
-                minuteHand++;
-                secondHand = 0
-            }
-            secondHand++
-            
-            updateSecondHand(a_canvas, secondHand, r);
-            drawCircle(a_context, r);
-            updateMinuteHand(a_canvas, minuteHand, r);
-            updateHourHand(a_canvas, hourHand, r);
+        function(){            
+            time = new Date();
+            updateClock(a_canvas, a_context, r, hands);
         }, 1000);
 }
-function updateSecondHand(s_canvas, secondHandIncrement, r){
-    var s_context = s_canvas.getContext("2d");
-    s_canvas.width = s_canvas.width;
-    xprime = midx + r * Math.sin(secondHandIncrement * Math.PI/30);
-    yprime = (midy - 100) + r * (1 - Math.cos(secondHandIncrement * Math.PI/30));
-    s_context.beginPath();
-    s_context.moveTo(midx, midy);
-    s_context.lineTo(xprime, yprime);
-    s_context.strokeStyle = "red";
-    s_context.stroke();
-    s_context.closePath();
-    var displaySecond = secondHandIncrement % 60;
-    if(displaySecond < 10){
-        displaySecond = "0" + displaySecond;
+
+function updateClock(a_canvas, a_context, r, hands) {
+    clearClock(a_canvas);
+    for (var i = 0; i < hands.length; i++) {
+        updateHand(a_canvas, hands[i], r);
     }
-    document.getElementById("sec").innerHTML = displaySecond;    
+    drawCircle(a_context, r);
 }
-function updateMinuteHand(m_canvas, minuteHandIncrement, r){
-    var m_context = m_canvas.getContext("2d");
-    //m_canvas.width = m_canvas.width;
-    xprime = midx + r * Math.sin(minuteHandIncrement * Math.PI/30);
-    yprime = (midy - 100) + r * (1 - Math.cos(minuteHandIncrement * Math.PI/30));
-    m_context.beginPath();
-    m_context.moveTo(midx, midy);
-    m_context.lineTo(xprime, yprime);
-    m_context.strokeStyle = "black";
-    m_context.stroke();
-    m_context.closePath();
-    var displayMinute = minuteHandIncrement % 60;
-    if(displayMinute < 10){
-        displayMinute = "0" + displayMinute;
+
+function updateHand(a_canvas, hand, r) {
+    var a_context = a_canvas.getContext("2d");
+    var value = hand.value();
+    halfMax = hand.max / 2;
+    xprime = midx + r * Math.sin(value * Math.PI / halfMax);
+    yprime = (midy - r) + r * (1 - Math.cos(value * Math.PI / halfMax));
+    a_context.beginPath();
+    a_context.moveTo(midx, midy);
+    a_context.lineTo(xprime, yprime);
+    a_context.lineWidth = hand.width;
+    a_context.strokeStyle = hand.color;
+    a_context.stroke();
+    a_context.closePath();
+    
+    var display = value % hand.max;
+    if(display < 10){
+        display = "0" + display;
     }
-    document.getElementById("min").innerHTML = displayMinute;
-}
-function updateHourHand(h_canvas, hourHandIncrement, r){
-    var h_context = h_canvas.getContext("2d");
-    xprime = midx + r * Math.sin(hourHandIncrement * Math.PI/6);
-    yprime = (midy - 100) + r * (1 - Math.cos(hourHandIncrement * Math.PI/6));
-    h_context.beginPath();
-    h_context.moveTo(midx, midy);
-    h_context.lineTo(xprime, yprime);
-    h_context.strokeStyle = "black";
-    h_context.lineWidth = 3;
-    h_context.stroke();
-    h_context.closePath();
-    var displayHour = hourHandIncrement % 12;
-    if(hourHandIncrement < 10){
-        displayHour = "0" + displayHour;
-    }
-    document.getElementById("hour").innerHTML = displayHour;
+    document.getElementById(hand.name).innerHTML = display;    
 }
 
 function drawCircle(a_context, r){
      a_context.beginPath();
      a_context.arc(midx, midy, r + 10, 0, 2 * Math.PI, true);
      a_context.strokeStyle = "black";
+     a_context.lineWidth = 1;
      a_context.stroke();
      a_context.closePath();   
+}
+
+function clearClock(a_canvas) {
+    a_canvas.width = a_canvas.width;
 }
